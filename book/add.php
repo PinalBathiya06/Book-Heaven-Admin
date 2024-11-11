@@ -111,6 +111,15 @@ $categories = $categoryCollection->find();
         border-radius: 5px;
     }
 </style>
+<?php
+// Handle delete action if `delete_id` is set
+if (isset($_GET['delete_id'])) {
+    $bookCollection->deleteOne(['_id' => new MongoDB\BSON\ObjectId($_GET['delete_id'])]);
+    header("Location: add.php"); // Refresh the page after deletion
+    exit();
+}
+?>
+
 
 <!-- Form for adding a new book -->
 <div class="main-panel">
@@ -168,8 +177,50 @@ $categories = $categoryCollection->find();
 </div>
 
 <!-- Display the added books in a table (Unchanged) -->
+<!-- Existing table code -->
 <div class="row table-container">
-    <!-- Table code remains the same -->
+    <div class="col-lg-12 grid-margin stretch-card">
+        <div class="card">
+            <div class="card-body">
+                <h4 class="card-title">Books List</h4>
+                <div class="table-striped table-bordered table-responsive">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>Author</th>
+                                <th>Description</th>
+                                <th>Image</th>
+                                <th>Publish Date</th>
+                                <th>Action</th> <!-- Added Action column -->
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <?php
+                            // Fetch all books from MongoDB collection
+                            $books = $bookCollection->find();
+                            foreach ($books as $book) {
+                                echo "<tr>
+                                    <td>" . htmlspecialchars($book['name']) . "</td>
+                                    <td>" . htmlspecialchars($book['author']) . "</td>
+                                    <td>" . htmlspecialchars($book['description']) . "</td>
+                                    <td><img src='" . htmlspecialchars($book['image']) . "' alt='Book Image'></td>
+                                    <td>" . htmlspecialchars($book['pub_date']) . "</td>
+                                    <td>
+                                        <!-- Edit and Delete buttons -->
+                                        <a href='edit_book.php?id=" . $book['_id'] . "' class='btn btn-warning btn-sm'>Edit</a>
+                                     <a href='add.php?delete_id=". $book['_id']. "' class='btn btn-danger btn-sm' onclick='return confirm(\"Are you sure you want to delete this book?\")'>Delete</a>
+                                    </td>
+                                </tr>";
+                            }
+                            ?>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
+
 
 <?php include('../includes1/footer.php'); ?>
